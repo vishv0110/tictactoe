@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tic Tac Toe</title>
+
+<style>
+body{
+    font-family: Arial;
+    text-align:center;
+    background:#f4f4f4;
+}
+
+h1{
+    margin-top:20px;
+}
+
+.board{
+    display:grid;
+    grid-template-columns:repeat(3,100px);
+    grid-gap:5px;
+    justify-content:center;
+    margin-top:30px;
+}
+
+.cell{
+    width:100px;
+    height:100px;
+    background:white;
+    font-size:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    border:2px solid #333;
+}
+
+.cell:hover{
+    background:#eee;
+}
+
+button{
+    margin-top:20px;
+    padding:10px 20px;
+    font-size:16px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Tic Tac Toe</h1>
+<h2 id="status">Player X's Turn</h2>
+
+<div class="board" id="board"></div>
+
+<button onclick="resetGame()">Restart Game</button>
+
+<script>
+let currentPlayer = "X";
+let board = ["","","","","","","","",""];
+let gameActive = true;
+
+const statusText = document.getElementById("status");
+const boardElement = document.getElementById("board");
+
+const winningConditions = [
+    [0,1,2],
+    [3,4,5],
+    [6,7,8],
+    [0,3,6],
+    [1,4,7],
+    [2,5,8],
+    [0,4,8],
+    [2,4,6]
+];
+
+function createBoard(){
+    boardElement.innerHTML="";
+    board.forEach((cell, index)=>{
+        const cellElement = document.createElement("div");
+        cellElement.classList.add("cell");
+        cellElement.innerText = cell;
+        cellElement.addEventListener("click", ()=> handleClick(index));
+        boardElement.appendChild(cellElement);
+    });
+}
+
+function handleClick(index){
+    if(board[index] !== "" || !gameActive) return;
+
+    board[index] = currentPlayer;
+    checkWinner();
+    currentPlayer = currentPlayer === "X" ? "O" : "X";
+    if(gameActive){
+        statusText.innerText = "Player " + currentPlayer + "'s Turn";
+    }
+    createBoard();
+}
+
+function checkWinner(){
+    for(let condition of winningConditions){
+        let [a,b,c] = condition;
+        if(board[a] && board[a] === board[b] && board[a] === board[c]){
+            statusText.innerText = "Player " + currentPlayer + " Wins!";
+            gameActive = false;
+            return;
+        }
+    }
+
+    if(!board.includes("")){
+        statusText.innerText = "It's a Draw!";
+        gameActive = false;
+    }
+}
+
+function resetGame(){
+    board = ["","","","","","","","",""];
+    currentPlayer = "X";
+    gameActive = true;
+    statusText.innerText = "Player X's Turn";
+    createBoard();
+}
+
+createBoard();
+</script>
+
+</body>
+</html>
