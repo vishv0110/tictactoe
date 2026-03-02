@@ -1,130 +1,144 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tic Tac Toe</title>
-
+<title>Flappy Bird</title>
 <style>
 body{
-    font-family: Arial;
+    margin:0;
     text-align:center;
-    background:#f4f4f4;
+    background:#70c5ce;
+    font-family:Arial;
+}
+
+canvas{
+    background:#70c5ce;
+    display:block;
+    margin:0 auto;
+    border:2px solid #000;
 }
 
 h1{
-    margin-top:20px;
-}
-
-.board{
-    display:grid;
-    grid-template-columns:repeat(3,100px);
-    grid-gap:5px;
-    justify-content:center;
-    margin-top:30px;
-}
-
-.cell{
-    width:100px;
-    height:100px;
-    background:white;
-    font-size:40px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    cursor:pointer;
-    border:2px solid #333;
-}
-
-.cell:hover{
-    background:#eee;
-}
-
-button{
-    margin-top:20px;
-    padding:10px 20px;
-    font-size:16px;
-    cursor:pointer;
+    color:white;
 }
 </style>
 </head>
 
 <body>
 
-<h1>Tic Tac Toe</h1>
-<h2 id="status">Player X's Turn</h2>
-
-<div class="board" id="board"></div>
-
-<button onclick="resetGame()">Restart Game</button>
+<h1>Flappy Bird</h1>
+<canvas id="gameCanvas" width="400" height="500"></canvas>
+<p>Press SPACE to Jump</p>
 
 <script>
-let currentPlayer = "X";
-let board = ["","","","","","","","",""];
-let gameActive = true;
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-const statusText = document.getElementById("status");
-const boardElement = document.getElementById("board");
+let bird = {
+    x: 50,
+    y: 200,
+    width: 20,
+    height: 20,
+    gravity: 0.6,
+    lift: -10,
+    velocity: 0
+};
 
-const winningConditions = [
-    [0,1,2],
-    [3,4,5],
-    [6,7,8],
-    [0,3,6],
-    [1,4,7],
-    [2,5,8],
-    [0,4,8],
-    [2,4,6]
-];
+let pipes = [];
+let frame = 0;
+let score = 0;
+let gameOver = false;
 
-function createBoard(){
-    boardElement.innerHTML="";
-    board.forEach((cell, index)=>{
-        const cellElement = document.createElement("div");
-        cellElement.classList.add("cell");
-        cellElement.innerText = cell;
-        cellElement.addEventListener("click", ()=> handleClick(index));
-        boardElement.appendChild(cellElement);
+function drawBird(){
+    ctx.fillStyle = "yellow";
+    ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+}
+
+function drawPipes(){
+    ctx.fillStyle = "green";
+    pipes.forEach(pipe=>{
+        ctx.fillRect(pipe.x, 0, pipe.width, pipe.top);
+        ctx.fillRect(pipe.x, canvas.height - pipe.bottom, pipe.width, pipe.bottom);
     });
 }
 
-function handleClick(index){
-    if(board[index] !== "" || !gameActive) return;
-
-    board[index] = currentPlayer;
-    checkWinner();
-    currentPlayer = currentPlayer === "X" ? "O" : "X";
-    if(gameActive){
-        statusText.innerText = "Player " + currentPlayer + "'s Turn";
+function updatePipes(){
+    if(frame % 90 === 0){
+        let topHeight = Math.random() * 200 + 50;
+        let gap = 120;
+        pipes.push({
+            x: canvas.width,
+            width: 40,
+            top: topHeight,
+            bottom: canvas.height - topHeight - gap
+        });
     }
-    createBoard();
-}
 
-function checkWinner(){
-    for(let condition of winningConditions){
-        let [a,b,c] = condition;
-        if(board[a] && board[a] === board[b] && board[a] === board[c]){
-            statusText.innerText = "Player " + currentPlayer + " Wins!";
-            gameActive = false;
-            return;
+    pipes.forEach(pipe=>{
+        pipe.x -= 2;
+
+        // Collision detection
+        if(
+            bird.x < pipe.x + pipe.width &&
+            bird.x + bird.width > pipe.x &&
+            (bird.y < pipe.top || bird.y + bird.height > canvas.height - pipe.bottom)
+        ){
+            gameOver = true;
         }
-    }
 
-    if(!board.includes("")){
-        statusText.innerText = "It's a Draw!";
-        gameActive = false;
+        // Score
+        if(pipe.x + pipe.width === bird.x){
+            score++;
+        }
+    });
+
+    pipes = pipes.filter(pipe => pipe.x + pipe.width > 0);
+}
+
+function updateBird(){
+    bird.velocity += bird.gravity;
+    bird.y += bird.velocity;
+
+    if(bird.y + bird.height > canvas.height || bird.y < 0){
+        gameOver = true;
     }
 }
 
-function resetGame(){
-    board = ["","","","","","","","",""];
-    currentPlayer = "X";
-    gameActive = true;
-    statusText.innerText = "Player X's Turn";
-    createBoard();
+function drawScore(){
+    ctx.fillStyle = "white";
+    ctx.font = "24px Arial";
+    ctx.fillText("Score: " + score, 10, 30);
 }
 
-createBoard();
+function gameLoop(){
+    if(gameOver){
+        ctx.fillStyle = "red";
+        ctx.font = "40px Arial";
+        ctx.fillText("Game Over", 100, 250);
+        ctx.font = "20px Arial";
+        ctx.fillText("Refresh to Restart", 120, 290);
+        return;
+    }
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    drawBird();
+    drawPipes();
+    updateBird();
+    updatePipes();
+    drawScore();
+
+    frame++;
+    requestAnimationFrame(gameLoop);
+}
+
+document.addEventListener("keydown", function(e){
+    if(e.code === "Space"){
+        bird.velocity = bird.lift;
+    }
+});
+
+gameLoop();
 </script>
 
 </body>
