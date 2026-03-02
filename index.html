@@ -2,22 +2,30 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Flappy Modi - Fail Sound Only</title>
+<title>Flappy Modi - Mobile</title>
 <style>
 body{
     margin:0;
     text-align:center;
     background:#70c5ce;
     font-family:Arial;
+    overflow:hidden;
 }
+
 canvas{
     background:#70c5ce;
     display:block;
     margin:0 auto;
     border:2px solid #000;
+    touch-action: manipulation; /* prevent default scrolling on touch */
 }
+
 h1{
     color:white;
+    font-size:24px;
+}
+p{
+    font-size:18px;
 }
 </style>
 </head>
@@ -25,19 +33,23 @@ h1{
 <body>
 
 <h1>Flappy Modi 😄</h1>
-<canvas id="gameCanvas" width="400" height="500"></canvas>
-<p>Press SPACE to Jump</p>
+<canvas id="gameCanvas"></canvas>
+<p>Tap or Press SPACE to Jump</p>
 
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// Modi image
+// Make canvas responsive
+canvas.width = Math.min(window.innerWidth - 20, 400);
+canvas.height = Math.min(window.innerHeight - 100, 500);
+
+// Load Modi image
 let modiImg = new Image();
-modiImg.src = "modi.png";  // put this file in same folder
+modiImg.src = "modi.png"; // same folder
 
 // Fail sound
-let failSound = new Audio("fail.mp3"); // put this file in same folder
+let failSound = new Audio("fail.mp3"); // same folder
 
 let bird = {
     x: 60,
@@ -53,10 +65,12 @@ let frame = 0;
 let score = 0;
 let gameOver = false;
 
+// Draw the bird (Modi)
 function drawBird(){
     ctx.drawImage(modiImg, bird.x, bird.y, bird.size, bird.size);
 }
 
+// Draw pipes
 function drawPipes(){
     ctx.fillStyle = "green";
     pipes.forEach(pipe=>{
@@ -65,6 +79,7 @@ function drawPipes(){
     });
 }
 
+// Update pipes
 function updatePipes(){
     if(frame % 120 === 0){
         let topHeight = Math.random() * 150 + 80;
@@ -80,7 +95,6 @@ function updatePipes(){
     pipes.forEach(pipe=>{
         pipe.x -= 1.5;
 
-        // Collision detection
         if(
             bird.x < pipe.x + pipe.width &&
             bird.x + bird.size > pipe.x &&
@@ -97,6 +111,7 @@ function updatePipes(){
     pipes = pipes.filter(pipe => pipe.x + pipe.width > 0);
 }
 
+// Update bird
 function updateBird(){
     bird.velocity += bird.gravity;
     bird.y += bird.velocity;
@@ -112,20 +127,22 @@ function updateBird(){
     }
 }
 
+// Draw score
 function drawScore(){
     ctx.fillStyle = "white";
     ctx.font = "24px Arial";
     ctx.fillText("Score: " + score, 10, 30);
 }
 
-// Trigger Game Over — ONLY PLAY FAIL SOUND
+// Trigger game over (only play fail sound)
 function triggerGameOver(){
     if(!gameOver){
         gameOver = true;
-        failSound.play();  // <--- ONLY this runs
+        failSound.play();
     }
 }
 
+// Game loop
 function gameLoop(){
     if(gameOver){
         ctx.fillStyle = "red";
@@ -148,12 +165,20 @@ function gameLoop(){
     requestAnimationFrame(gameLoop);
 }
 
+// Controls: Space key
 document.addEventListener("keydown", function(e){
     if(e.code === "Space"){
         bird.velocity = bird.lift;
     }
 });
 
+// Controls: Mobile touch
+canvas.addEventListener("touchstart", function(e){
+    bird.velocity = bird.lift;
+    e.preventDefault(); // prevent scrolling
+});
+
+// Start game
 gameLoop();
 </script>
 
