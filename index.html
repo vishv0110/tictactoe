@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Flappy Modi - Voice Alert</title>
+<title>Flappy Modi - Voice Only</title>
 <style>
 body{
     margin:0;
@@ -35,9 +35,6 @@ const ctx = canvas.getContext("2d");
 // Load Modi image
 let modiImg = new Image();
 modiImg.src = "modi.png";   // place this file in same folder
-
-// Load fail sound
-let failSound = new Audio("fail.mp3"); // place fail.mp3 in same folder
 
 let bird = {
     x: 60,
@@ -120,7 +117,8 @@ function drawScore(){
 function triggerGameOver(){
     if(!gameOver){
         gameOver = true;
-        failSound.play();
+
+        // Only speech synthesis
         let utter = new SpeechSynthesisUtterance("Game Over!");
         speechSynthesis.speak(utter);
     }
