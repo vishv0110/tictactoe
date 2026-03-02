@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Flappy Modi - Fail Sound</title>
+<title>Flappy Modi - Fail Sound Only</title>
 <style>
 body{
     margin:0;
@@ -32,12 +32,12 @@ h1{
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// Load Modi image
+// Modi image
 let modiImg = new Image();
-modiImg.src = "modi.png";   // place this file in same folder
+modiImg.src = "modi.png";  // put this file in same folder
 
-// Load fail sound
-let failSound = new Audio("fail.mp3"); // place fail.mp3 in same folder
+// Fail sound
+let failSound = new Audio("fail.mp3"); // put this file in same folder
 
 let bird = {
     x: 60,
@@ -80,6 +80,7 @@ function updatePipes(){
     pipes.forEach(pipe=>{
         pipe.x -= 1.5;
 
+        // Collision detection
         if(
             bird.x < pipe.x + pipe.width &&
             bird.x + bird.size > pipe.x &&
@@ -117,11 +118,11 @@ function drawScore(){
     ctx.fillText("Score: " + score, 10, 30);
 }
 
-// Game over function
+// Trigger Game Over — ONLY PLAY FAIL SOUND
 function triggerGameOver(){
     if(!gameOver){
         gameOver = true;
-        failSound.play(); // play fail.mp3
+        failSound.play();  // <--- ONLY this runs
     }
 }
 
